@@ -131,33 +131,6 @@ typedef struct
 
 #endif /* MEMS_SHARED_TYPES */
 
-#ifndef MEMS_UCF_SHARED_TYPES
-#define MEMS_UCF_SHARED_TYPES
-
-/** @defgroup    Generic address-data structure definition
-  * @brief       This structure is useful to load a predefined configuration
-  *              of a sensor.
-  *              You can create a sensor configuration by your own or using
-  *              Unico / Unicleo tools available on STMicroelectronics
-  *              web site.
-  *
-  * @{
-  *
-  */
-
-typedef struct
-{
-  uint8_t address;
-  uint8_t data;
-} ucf_line_t;
-
-/**
-  * @}
-  *
-  */
-
-#endif /* MEMS_UCF_SHARED_TYPES */
-
 /**
   * @}
   *
@@ -290,30 +263,6 @@ typedef struct
 #define HTS221_T1_OUT_H            0x3FU
 
 /**
-  * @defgroup HTS221_Register_Union
-  * @brief    This union group all the registers having a bit-field
-  *           description.
-  *           This union is useful but it's not needed by the driver.
-  *
-  *           REMOVING this union you are compliant with:
-  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
-  *
-  * @{
-  *
-  */
-typedef union
-{
-  hts221_av_conf_t        av_conf;
-  hts221_ctrl_reg1_t      ctrl_reg1;
-  hts221_ctrl_reg2_t      ctrl_reg2;
-  hts221_ctrl_reg3_t      ctrl_reg3;
-  hts221_status_reg_t     status_reg;
-  hts221_t1_t0_msb_t      t1_t0_msb;
-  bitwise_t               bitwise;
-  uint8_t                 byte;
-} hts221_reg_t;
-
-/**
   * @}
   *
   */
@@ -330,11 +279,11 @@ typedef union
  * The __weak directive allows the final application to overwrite
  * them with a custom implementation.
  */
-int32_t hts221_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+int32_t hts221_read_reg(const stmdev_ctx_t *ctx, uint8_t reg,
                         uint8_t *data,
                         uint16_t len);
-int32_t hts221_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
-                         uint8_t *data,
+int32_t hts221_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
+                         const uint8_t *data,
                          uint16_t len);
 
 typedef enum
@@ -349,8 +298,8 @@ typedef enum
   HTS221_H_AVG_512  = 7,
   HTS221_H_AVG_ND   = 8,
 } hts221_avgh_t;
-int32_t hts221_humidity_avg_set(stmdev_ctx_t *ctx, hts221_avgh_t val);
-int32_t hts221_humidity_avg_get(stmdev_ctx_t *ctx,
+int32_t hts221_humidity_avg_set(const stmdev_ctx_t *ctx, hts221_avgh_t val);
+int32_t hts221_humidity_avg_get(const stmdev_ctx_t *ctx,
                                 hts221_avgh_t *val);
 
 typedef enum
@@ -365,9 +314,9 @@ typedef enum
   HTS221_T_AVG_256 = 7,
   HTS221_T_AVG_ND  = 8,
 } hts221_avgt_t;
-int32_t hts221_temperature_avg_set(stmdev_ctx_t *ctx,
+int32_t hts221_temperature_avg_set(const stmdev_ctx_t *ctx,
                                    hts221_avgt_t val);
-int32_t hts221_temperature_avg_get(stmdev_ctx_t *ctx,
+int32_t hts221_temperature_avg_get(const stmdev_ctx_t *ctx,
                                    hts221_avgt_t *val);
 
 typedef enum
@@ -378,40 +327,40 @@ typedef enum
   HTS221_ODR_12Hz5 = 3,
   HTS221_ODR_ND    = 4,
 } hts221_odr_t;
-int32_t hts221_data_rate_set(stmdev_ctx_t *ctx, hts221_odr_t val);
-int32_t hts221_data_rate_get(stmdev_ctx_t *ctx, hts221_odr_t *val);
+int32_t hts221_data_rate_set(const stmdev_ctx_t *ctx, hts221_odr_t val);
+int32_t hts221_data_rate_get(const stmdev_ctx_t *ctx, hts221_odr_t *val);
 
-int32_t hts221_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t hts221_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t hts221_block_data_update_set(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t hts221_block_data_update_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_one_shoot_trigger_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t hts221_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t hts221_one_shoot_trigger_set(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t hts221_one_shoot_trigger_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t hts221_temp_data_ready_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_hum_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t hts221_hum_data_ready_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_humidity_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t hts221_humidity_raw_get(const stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t hts221_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t hts221_temperature_raw_get(const stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t hts221_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t hts221_device_id_get(const stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t hts221_power_on_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t hts221_power_on_set(const stmdev_ctx_t *ctx, uint8_t val);
 
-int32_t hts221_power_on_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t hts221_power_on_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_heater_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t hts221_heater_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t hts221_heater_set(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t hts221_heater_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_boot_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t hts221_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t hts221_boot_set(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t hts221_boot_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_status_get(stmdev_ctx_t *ctx,
+int32_t hts221_status_get(const stmdev_ctx_t *ctx,
                           hts221_status_reg_t *val);
 
-int32_t hts221_drdy_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t hts221_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t hts221_drdy_on_int_set(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t hts221_drdy_on_int_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum
 {
@@ -419,8 +368,8 @@ typedef enum
   HTS221_OPEN_DRAIN  = 1,
   HTS221_PIN_MODE_ND = 2,
 } hts221_pp_od_t;
-int32_t hts221_pin_mode_set(stmdev_ctx_t *ctx, hts221_pp_od_t val);
-int32_t hts221_pin_mode_get(stmdev_ctx_t *ctx, hts221_pp_od_t *val);
+int32_t hts221_pin_mode_set(const stmdev_ctx_t *ctx, hts221_pp_od_t val);
+int32_t hts221_pin_mode_get(const stmdev_ctx_t *ctx, hts221_pp_od_t *val);
 
 typedef enum
 {
@@ -428,22 +377,22 @@ typedef enum
   HTS221_ACTIVE_LOW  = 1,
   HTS221_ACTIVE_ND   = 2,
 } hts221_drdy_h_l_t;
-int32_t hts221_int_polarity_set(stmdev_ctx_t *ctx,
+int32_t hts221_int_polarity_set(const stmdev_ctx_t *ctx,
                                 hts221_drdy_h_l_t val);
-int32_t hts221_int_polarity_get(stmdev_ctx_t *ctx,
+int32_t hts221_int_polarity_get(const stmdev_ctx_t *ctx,
                                 hts221_drdy_h_l_t *val);
 
-int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, float_t *val);
-int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_hum_rh_point_0_get(const stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_hum_rh_point_1_get(const stmdev_ctx_t *ctx, float_t *val);
 
-int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, float_t *val);
-int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_temp_deg_point_0_get(const stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_temp_deg_point_1_get(const stmdev_ctx_t *ctx, float_t *val);
 
-int32_t hts221_hum_adc_point_0_get(stmdev_ctx_t *ctx, float_t *val);
-int32_t hts221_hum_adc_point_1_get(stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_hum_adc_point_0_get(const stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_hum_adc_point_1_get(const stmdev_ctx_t *ctx, float_t *val);
 
-int32_t hts221_temp_adc_point_0_get(stmdev_ctx_t *ctx, float_t *val);
-int32_t hts221_temp_adc_point_1_get(stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_temp_adc_point_0_get(const stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_temp_adc_point_1_get(const stmdev_ctx_t *ctx, float_t *val);
 
 /**
   * @}

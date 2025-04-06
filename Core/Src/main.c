@@ -24,6 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32l4xx_hal.h"
 #ifdef __GNUC__
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 #else
@@ -121,9 +122,6 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  SystemClock_Config();
-  MX_USART2_UART_Init(); // Ensure this is called
-  MX_I2C1_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -137,7 +135,7 @@ int main(void)
   lps22hh_device_id_get(&lps22hh_dev_ctx, &whoamI_lps22hh);
 
   printf("%d\r\n", whoamI_lps22hh);
-  if ( whoamI_lps22hh != LPS22HH_ID )
+  if(whoamI_lps22hh != LPS22HH_ID)
     while (1); /*manage here device not found */
 
   /* Restore default configuration */
@@ -198,6 +196,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  printf("main function started\r\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
