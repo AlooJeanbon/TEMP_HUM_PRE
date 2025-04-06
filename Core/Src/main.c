@@ -65,6 +65,13 @@ static float_t hts221_temperature_degC;
 
 static uint8_t hts221_whoamI;
 static uint8_t hts221_tx_buffer[1000];
+
+static uint32_t lps22hh_data_raw_pressure;
+static int16_t lps22hh_data_raw_temperature;
+static float_t lps22hh_pressure_hPa;
+static float_t lps22hh_temperature_degC;
+static uint8_t lps22hh_whoamI, lps22hh_rst;
+static uint8_t lps22hh_tx_buffer[1000];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,6 +96,11 @@ float_t linear_interpolation(lin_t *lin, int16_t x)
 }
 
 void i2c_detect();
+
+static int32_t lps22hh_platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
+                              uint16_t len);
+static int32_t lps22hh_platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len);
 
 /* USER CODE END PFP */
 
@@ -119,6 +131,12 @@ int main(void)
   hts221_dev_ctx.read_reg = hts221_platform_read;
   hts221_dev_ctx.mdelay = HAL_Delay;
   hts221_dev_ctx.handle = &hi2c1;
+
+  stmdev_ctx_t lps22hh_dev_ctx;
+  lps22hh_dev_ctx.write_reg = lps22hh_platform_write;
+  lps22hh_dev_ctx.read_reg = lps22hh_platform_read;
+  lps22hh_dev_ctx.mdelay = HAL_Delay;
+  lps22hh_dev_ctx.handle = &hi2c1;
 
   /* USER CODE END Init */
 
@@ -166,6 +184,29 @@ int main(void)
   /* Device power on */
   hts221_power_on_set(&hts221_dev_ctx, PROPERTY_ENABLE);
 
+
+
+
+  lps22hh_whoamI = 0;
+  lps22hh_device_id_get(&lps22hh_dev_ctx, &lps22hh_whoamI);
+
+  if ( lps22hh_whoamI != LPS22HH_ID )
+    while (1); /*manage here device not found */
+
+  /* Restore default configuration */
+  lps22hh_reset_set(&lps22hh_dev_ctx, PROPERTY_ENABLE);
+
+  do {
+    lps22hh_reset_get(&lps22hh_dev_ctx, &lps22hh_rst);
+  } while (lps22hh_rst);
+
+  /* Enable Block Data Update */
+  lps22hh_block_data_update_set(&lps22hh_dev_ctx, PROPERTY_ENABLE);
+  /* Set Output Data Rate */
+  lps22hh_data_rate_set(&lps22hh_dev_ctx, LPS22HH_10_Hz_LOW_NOISE);
+
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -207,7 +248,26 @@ int main(void)
 	  }
 
 
-	  HAL_Delay(1000);
+	  lps22hh_status_t lps22hh_status;
+	  lps22hh_read_reg(&lps22hh_dev_ctx, LPS22HH_STATUS, (uint8_t *)&lps22hh_status, 1);
+
+	  if (lps22hh_status.p_da) {
+	    memset(&lps22hh_data_raw_pressure, 0x00, sizeof(uint32_t));
+	    lps22hh_pressure_raw_get(&lps22hh_dev_ctx, &lps22hh_data_raw_pressure);
+	    lps22hh_pressure_hPa = lps22hh_from_lsb_to_hpa( lps22hh_data_raw_pressure);
+	    printf("pressure [hPa]:%6.2f\r\n", lps22hh_pressure_hPa);
+	    printf( (char *)lps22hh_tx_buffer);
+	  }
+
+	  if (lps22hh_status.t_da) {
+	    memset(&lps22hh_data_raw_temperature, 0x00, sizeof(int16_t));
+	    lps22hh_temperature_raw_get(&lps22hh_dev_ctx, &lps22hh_data_raw_temperature);
+	    lps22hh_temperature_degC = lps22hh_from_lsb_to_celsius( lps22hh_data_raw_temperature );
+	    printf("temperature [degC]:%6.2f\r\n", lps22hh_temperature_degC );
+	    printf( (char *)lps22hh_tx_buffer);
+	  }
+
+	  HAL_Delay(10000);
   }
   /* USER CODE END 3 */
 }
@@ -297,6 +357,22 @@ void i2c_detect(){
 		}
 	}
 	if(devices == 0) printf("No devices found\n\r");
+}
+
+static int32_t lps22hh_platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
+                              uint16_t len)
+{
+  HAL_I2C_Mem_Write(handle, LPS22HH_I2C_ADD_H, reg,
+                    I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
+  return 0;
+}
+
+static int32_t lps22hh_platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len)
+{
+  HAL_I2C_Mem_Read(handle, LPS22HH_I2C_ADD_H, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  return 0;
 }
 
 /* USER CODE END 4 */
